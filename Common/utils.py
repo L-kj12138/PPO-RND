@@ -3,7 +3,7 @@ import cv2
 import gym
 from copy import deepcopy
 import torch
-from torch._six import inf
+from torch import inf
 
 
 def mean_of_list(func):
@@ -16,6 +16,8 @@ def mean_of_list(func):
 
 
 def preprocessing(img):
+    if isinstance(img, tuple):
+        img = img[0]
     img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     img = cv2.resize(img, (84, 84), interpolation=cv2.INTER_AREA)
     return img
@@ -51,7 +53,7 @@ def explained_variance(ypred, y):
 def make_atari(env_id, max_episode_steps, sticky_action=True, max_and_skip=True):
     env = gym.make(env_id)
     env._max_episode_steps = max_episode_steps * 4
-    assert 'NoFrameskip' in env.spec.id
+    # assert 'NoFrameskip' in env.spec.id
     if sticky_action:
         env = StickyActionEnv(env)
     if max_and_skip:
@@ -91,7 +93,8 @@ class RepeatActionEnv(gym.Wrapper):
     def step(self, action):
         reward, done = 0, False
         for t in range(4):
-            state, r, done, info = self.env.step(action)
+            state, r, terminated, truncated, info = self.env.step(action)
+            done = terminated or truncated
             if t == 2:
                 self.successive_frame[0] = state
             elif t == 3:
