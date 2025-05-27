@@ -2,6 +2,7 @@ from Common.runner import Worker
 from Common.play import Play
 from Common.config import get_params
 from Common.logger import Logger
+import torch
 from torch.multiprocessing import Process, Pipe
 import numpy as np
 from Brain.brain import Brain
@@ -14,6 +15,7 @@ def run_workers(worker, conn):
 
 
 if __name__ == '__main__':
+    torch.multiprocessing.set_start_method('spawn') 
     config = get_params()
 
     test_env = gym.make(config["env_name"])
